@@ -4,6 +4,7 @@ import {
   Boxes,
   FolderKanban,
   ListTodo,
+  LogOut,
   PanelLeftClose,
   PanelLeftOpen,
   X,
@@ -26,7 +27,12 @@ const navigationItems = [
 
 const Sidebar = ({ isOpen = false, onClose }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    onClose?.();
+  };
 
   return (
     <>
@@ -239,6 +245,32 @@ const Sidebar = ({ isOpen = false, onClose }) => {
               </p>
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            title={collapsed ? "Logout" : undefined}
+            className={`
+              mt-1 flex h-11 w-full items-center
+              rounded-button
+              text-sm font-medium text-text-secondary
+              transition-colors duration-200
+              hover:bg-surface-secondary
+              hover:text-text
+
+              ${
+                collapsed
+                  ? "md:justify-center md:px-3"
+                  : "gap-3 px-3"
+              }
+            `}
+          >
+            <LogOut className="h-5 w-5 shrink-0" />
+
+            <span className={collapsed ? "md:hidden" : ""}>
+              Logout
+            </span>
+          </button>
         </div>
       </aside>
     </>

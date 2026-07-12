@@ -28,6 +28,22 @@ const getTasks = async (
   return response.data;
 };
 
+const getMyTasks = async ({
+  page = 0,
+  size = 9,
+  sort = "createdAt,desc",
+} = {}) => {
+  const response = await api.get("/tasks/my", {
+    params: {
+      page,
+      size,
+      sort,
+    },
+  });
+
+  return response.data;
+};
+
 const createTask = async (projectId, taskData) => {
   const response = await api.post(
     `/projects/${projectId}/tasks`,
@@ -79,6 +95,7 @@ const getTaskById = async (projectId, taskId) => {
 
 const taskService = {
   getTasks,
+  getMyTasks,
   getTaskById,
   createTask,
   updateTask,

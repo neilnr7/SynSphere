@@ -8,6 +8,7 @@ import TaskCard from "@/components/cards/TaskCard";
 import projectService from "@/services/projectService";
 import taskService from "@/services/taskService";
 import useAuth from "@/hooks/useAuth";
+import ConfirmModal from "@/components/modals/ConfirmModal";
 
 const ProjectDetailPage = () => {
   const { projectId } = useParams();
@@ -17,9 +18,14 @@ const ProjectDetailPage = () => {
   const [project, setProject] = useState(null);
   const [members, setMembers] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [taskToDelete, setTaskToDelete] = useState(null);
+  const [deletingTask, setDeletingTask] = useState(false);
 
   const fetchProjectData = useCallback(async () => {
     try {
@@ -30,12 +36,16 @@ const ProjectDetailPage = () => {
         await Promise.all([
           projectService.getProjectById(projectId),
           projectService.getProjectMembers(projectId),
-          taskService.getTasks(projectId),
+          taskService.getTasks(projectId, {
+            page,
+            size: 9,
+          }),
         ]);
 
       setProject(projectData);
       setMembers(memberData);
       setTasks(taskPage.content || []);
+      setTotalPages(taskPage.totalPages || 0);
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -44,7 +54,7 @@ const ProjectDetailPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [projectId]);
+  }, [projectId, page]);
 
   useEffect(() => {
     fetchProjectData();
@@ -63,53 +73,68 @@ const ProjectDetailPage = () => {
   };
 
   const currentMember = members.find(
-  (member) => member.email === user?.email,
-);
+    (member) => member.email === user?.email,
+  );
 
-const canEditTasks =
-  currentMember?.role === "OWNER" ||
-  currentMember?.role === "MANAGER";
+  const canEditTasks =
+    currentMember?.role === "OWNER" ||
+    currentMember?.role === "MANAGER";
 
-const canChangeTaskStatus = (task) => {
-if (!currentMember) {
-    return false;
-}
+  const canDeleteTasks =
+    currentMember?.role === "OWNER";
 
-const isManagerOrOwner =
-    currentMember.role === "OWNER" ||
-    currentMember.role === "MANAGER";
+  const canChangeTaskStatus = (task) => {
+    if (!currentMember) {
+      return false;
+    }
 
-const isAssignedUser =
-    task.assignedTo === currentMember.userId;
+    const isManagerOrOwner =
+      currentMember.role === "OWNER" ||
+      currentMember.role === "MANAGER";
 
-return isManagerOrOwner || isAssignedUser;
-};
+    const isAssignedUser =
+      task.assignedTo === currentMember.userId;
 
-const handleStatusChange = async (task, status) => {
-  try {
-    setError("");
+    return isManagerOrOwner || isAssignedUser;
+  };
 
-    const updatedTask = await taskService.updateTaskStatus(
-      projectId,
-      task.id,
-      status,
+  const handleStatusChange = async (task, status) => {
+    try {
+      setError("");
+
+      const updatedTask = await taskService.updateTaskStatus(
+        projectId,
+        task.id,
+        status,
+      );
+
+      setTasks((currentTasks) =>
+        currentTasks.map((currentTask) =>
+          currentTask.id === updatedTask.id
+            ? updatedTask
+            : currentTask,
+        ),
+      );
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          err.response?.data ||
+          "Unable to update task status.",
+      );
+    }
+  };
+
+  const handlePreviousPage = () => {
+    setPage((currentPage) =>
+      Math.max(currentPage - 1, 0),
     );
+  };
 
-    setTasks((currentTasks) =>
-      currentTasks.map((currentTask) =>
-        currentTask.id === updatedTask.id
-          ? updatedTask
-          : currentTask,
-      ),
+  const handleNextPage = () => {
+    setPage((currentPage) =>
+      Math.min(currentPage + 1, totalPages - 1),
     );
-  } catch (err) {
-    setError(
-      err.response?.data?.message ||
-        err.response?.data ||
-        "Unable to update task status.",
-    );
-  }
-};
+  };
 
   const handleCreateTask = () => {
     navigate(`/projects/${projectId}/tasks/new`);
@@ -141,6 +166,56 @@ const handleStatusChange = async (task, status) => {
       </div>
     );
   }
+
+  const handleTaskClick = (task) => {
+    navigate(
+      `/projects/${projectId}/tasks/${task.id}`,
+    );
+  };
+
+  const handleDeleteTask = (task) => {
+    setTaskToDelete(task);
+  };
+
+  const handleCancelDelete = () => {
+    if (deletingTask) {
+      return;
+    }
+
+    setTaskToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!taskToDelete) {
+      return;
+    }
+
+    try {
+      setDeletingTask(true);
+      setError("");
+
+      await taskService.deleteTask(
+        projectId,
+        taskToDelete.id,
+      );
+
+      setTasks((currentTasks) =>
+        currentTasks.filter(
+          (task) => task.id !== taskToDelete.id,
+        ),
+      );
+
+      setTaskToDelete(null);
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          err.response?.data ||
+          "Unable to delete task.",
+      );
+    } finally {
+      setDeletingTask(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -192,13 +267,15 @@ const handleStatusChange = async (task, status) => {
           </p>
         </div>
 
-        <Button
-          leftIcon={Plus}
-          onClick={handleCreateTask}
-          className="shrink-0"
-        >
-          New Task
-        </Button>
+        {canEditTasks && (
+          <Button
+            leftIcon={Plus}
+            onClick={handleCreateTask}
+            className="shrink-0"
+          >
+            New Task
+          </Button>
+        )}
       </div>
 
       {tasks.length === 0 ? (
@@ -207,12 +284,15 @@ const handleStatusChange = async (task, status) => {
           title="No tasks yet"
           description="Create the first task for this project and start tracking work."
           action={
-            <Button
-              leftIcon={Plus}
-              onClick={handleCreateTask}
-            >
-              New Task
-            </Button>
+            canEditTasks ? (
+              <Button
+                leftIcon={Plus}
+                onClick={handleCreateTask}
+                className="shrink-0"
+              >
+                New Task
+              </Button>
+            ) : null
           }
         />
       ) : (
@@ -226,23 +306,76 @@ const handleStatusChange = async (task, status) => {
         >
           {tasks.map((task) => (
             <TaskCard
-                key={task.id}
-                task={task}
-                assignee={getTaskAssignee(task)}
-                onEdit={
-                    canEditTasks
-                    ? handleEditTask
-                    : undefined
-                }
-                onStatusChange={
-                    canChangeTaskStatus(task)
-                    ? handleStatusChange
-                    : undefined
-                }
-                />
+              key={task.id}
+              task={task}
+              assignee={getTaskAssignee(task)}
+              onClick={handleTaskClick}
+              onEdit={
+                canEditTasks
+                  ? handleEditTask
+                  : undefined
+              }
+              onDelete={
+                canDeleteTasks
+                  ? handleDeleteTask
+                  : undefined
+              }
+              onStatusChange={
+                canChangeTaskStatus(task)
+                  ? handleStatusChange
+                  : undefined
+              }
+            />
           ))}
         </div>
       )}
+
+      {totalPages > 1 && (
+        <div
+          className="
+            flex flex-col gap-3
+            border-t border-border
+            pt-6
+            sm:flex-row sm:items-center sm:justify-between
+          "
+        >
+          <p className="text-sm text-text-secondary">
+            Page {page + 1} of {totalPages}
+          </p>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              onClick={handlePreviousPage}
+              disabled={page === 0}
+            >
+              Previous
+            </Button>
+
+            <Button
+              variant="secondary"
+              onClick={handleNextPage}
+              disabled={page >= totalPages - 1}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <ConfirmModal
+        open={Boolean(taskToDelete)}
+        title="Delete Task"
+        description={
+          taskToDelete
+            ? `Are you sure you want to delete "${taskToDelete.title}"? This action cannot be undone.`
+            : ""
+        }
+        confirmLabel="Delete Task"
+        loading={deletingTask}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   );
 };

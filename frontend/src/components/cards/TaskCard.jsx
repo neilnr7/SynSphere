@@ -33,6 +33,7 @@ const STATUS_ACTIONS = [
 const TaskCard = ({
   task,
   assignee,
+  projectName,
   onClick,
   onEdit,
   onDelete,
@@ -250,14 +251,22 @@ const TaskCard = ({
         )}
       </div>
 
-      <h3
-        className="
-          mb-4 line-clamp-2
-          text-base font-semibold text-text
-        "
-      >
-        {task.title}
-      </h3>
+      <div className="mb-4">
+        <h3
+          className="
+            line-clamp-2
+            text-base font-semibold text-text
+          "
+        >
+          {task.title}
+        </h3>
+
+        {projectName && (
+          <p className="mt-1 truncate text-sm text-text-muted">
+            {projectName}
+          </p>
+        )}
+      </div>
 
       <div
         className="

@@ -10,6 +10,8 @@ import EditProjectPage from "@/pages/projects/EditProjectPage";
 import ProjectDetailPage from "@/pages/projects/ProjectDetailPage";
 import CreateTaskPage from "@/pages/tasks/CreateTaskPage";
 import EditTaskPage from "@/pages/tasks/EditTaskPage";
+import MyTasksPage from "@/pages/mytasks/MyTasksPage";
+import TaskDetailPage from "@/pages/tasks/TaskDetailPage";
 
 
 const AppRouter = () => {
@@ -50,13 +52,18 @@ const AppRouter = () => {
             />
 
             <Route
+              path="/projects/:projectId/tasks/:taskId"
+              element={<TaskDetailPage />}
+            />
+
+            <Route
               path="/projects/:projectId/tasks/:taskId/edit"
               element={<EditTaskPage />}
             />  
 
             <Route
               path="/my-tasks"
-              element={<div>My Tasks Page</div>}
+              element={<MyTasksPage />}
             />
           </Route>
         </Route>
