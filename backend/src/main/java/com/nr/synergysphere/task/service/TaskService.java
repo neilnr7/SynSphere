@@ -11,6 +11,7 @@ import com.nr.synergysphere.project.repository.ProjectRepository;
 import com.nr.synergysphere.task.dto.request.CreateTaskRequest;
 import com.nr.synergysphere.task.dto.request.UpdateTaskRequest;
 import com.nr.synergysphere.task.dto.request.UpdateTaskStatusRequest;
+import com.nr.synergysphere.task.dto.response.MyTaskResponse;
 import com.nr.synergysphere.task.dto.response.TaskResponse;
 import com.nr.synergysphere.task.model.Task;
 import com.nr.synergysphere.task.model.TaskStatus;
@@ -323,6 +324,19 @@ public class TaskService {
                 .map(this::mapToResponse);
     }
 
+    public Page<MyTaskResponse> getMyTasks(
+            String email,
+            Pageable pageable
+    ) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return taskRepository
+                .findByAssignedTo(user, pageable)
+                .map(this::mapToMyTaskResponse);
+    }
+
     public TaskResponse getTaskById(
             UUID projectId,
             UUID taskId,
@@ -345,6 +359,47 @@ public class TaskService {
         }
 
         return mapToResponse(task);
+    }
+
+    private MyTaskResponse mapToMyTaskResponse(Task task) {
+
+        return MyTaskResponse.builder()
+                .id(task.getTaskId())
+                .title(task.getTitle())
+                .description(task.getDescription())
+                .status(task.getStatus())
+                .priority(task.getPriority())
+                .dueDate(task.getDueDate())
+                .assignedTo(
+                        task.getAssignedTo() != null
+                                ? task.getAssignedTo().getId()
+                                : null
+                )
+                .createdBy(
+                        task.getCreatedBy() != null
+                                ? task.getCreatedBy().getId()
+                                : null
+                )
+                .projectId(
+                        task.getProject() != null
+                                ? task.getProject().getId()
+                                : null
+                )
+                .projectName(
+                        task.getProject() != null
+                                ? task.getProject().getName()
+                                : null
+                )
+                .assigneeName(
+                        task.getAssignedTo() != null
+                                ? task.getAssignedTo().getName()
+                                : null
+                )
+                .tags(task.getTags())
+                .imageUrl(task.getImageUrl())
+                .createdAt(task.getCreatedAt())
+                .updatedAt(task.getUpdatedAt())
+                .build();
     }
 
     private TaskResponse mapToResponse(Task task) {
