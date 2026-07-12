@@ -59,8 +59,10 @@ public class ProjectController {
         );
     }
 
-    @GetMapping("/test-auth")
-    public String testAuth(Authentication authentication){
-        return authentication.getName();
+    @GetMapping
+    public List<ProjectResponse> getProjects(Authentication authentication) {
+        return projectService.getProjects(authentication.getName());
     }
+
+
 }

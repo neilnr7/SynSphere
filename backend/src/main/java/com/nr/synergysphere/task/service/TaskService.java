@@ -323,6 +323,30 @@ public class TaskService {
                 .map(this::mapToResponse);
     }
 
+    public TaskResponse getTaskById(
+            UUID projectId,
+            UUID taskId,
+            String email
+    ) {
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        getProjectMember(project, user);
+
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        if (!task.getProject().getId().equals(projectId)) {
+            throw new RuntimeException("Task does not belong to this project");
+        }
+
+        return mapToResponse(task);
+    }
+
     private TaskResponse mapToResponse(Task task) {
 
         TaskResponse response = new TaskResponse();

@@ -275,6 +275,19 @@ public class ProjectService {
         return mapToResponse(project);
     }
 
+    public List<ProjectResponse> getProjects(String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return projectMemberRepository
+                .findByUser(user)
+                .stream()
+                .map(ProjectMember::getProject)
+                .map(this::mapToResponse)
+                .toList();
+    }
+
     private ProjectResponse mapToResponse(Project project) {
 
         return ProjectResponse.builder()

@@ -101,4 +101,20 @@ public class TaskController {
                 )
         );
     }
+
+    @GetMapping("/{taskId}")
+    public ResponseEntity<TaskResponse> getTaskById(
+            @PathVariable UUID projectId,
+            @PathVariable UUID taskId,
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(
+                taskService.getTaskById(
+                        projectId,
+                        taskId,
+                        authentication.getName()
+                )
+        );
+    }
+
 }
