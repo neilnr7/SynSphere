@@ -5,10 +5,13 @@ import Button from "@/components/ui/Button";
 import EmptyState from "@/components/common/EmptyState";
 import PageLoader from "@/components/common/PageLoader";
 import TaskCard from "@/components/cards/TaskCard";
+import ActivityFeed from "@/components/activity/ActivityFeed";
 import projectService from "@/services/projectService";
 import taskService from "@/services/taskService";
+import activityService from "@/services/activityService";
 import useAuth from "@/hooks/useAuth";
 import ConfirmModal from "@/components/modals/ConfirmModal";
+
 
 const ProjectDetailPage = () => {
   const { projectId } = useParams();
@@ -18,6 +21,15 @@ const ProjectDetailPage = () => {
   const [project, setProject] = useState(null);
   const [members, setMembers] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [activityPage, setActivityPage] = useState(null);
+
+  const [activityActionFilter, setActivityActionFilter] =
+    useState("");
+
+  const [activityEntityFilter, setActivityEntityFilter] =
+    useState("");
+
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
@@ -32,20 +44,33 @@ const ProjectDetailPage = () => {
       setLoading(true);
       setError("");
 
-      const [projectData, memberData, taskPage] =
-        await Promise.all([
-          projectService.getProjectById(projectId),
-          projectService.getProjectMembers(projectId),
-          taskService.getTasks(projectId, {
-            page,
-            size: 9,
-          }),
-        ]);
+      const [
+        projectData,
+        memberData,
+        taskPage,
+        activityData,
+      ] = await Promise.all([
+        projectService.getProjectById(projectId),
+        projectService.getProjectMembers(projectId),
+        taskService.getTasks(projectId, {
+          page,
+          size: 9,
+        }),
+        activityService.getProjectActivities(projectId, {
+          page: 0,
+          size: 10,
+          actionType: activityActionFilter || undefined,
+          entityType: activityEntityFilter || undefined,
+        }),
+      ]);
 
       setProject(projectData);
       setMembers(memberData);
       setTasks(taskPage.content || []);
       setTotalPages(taskPage.totalPages || 0);
+
+      setActivities(activityData.content || []);
+      setActivityPage(activityData);
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -54,7 +79,12 @@ const ProjectDetailPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [projectId, page]);
+  }, [
+    projectId,
+    page,
+    activityActionFilter,
+    activityEntityFilter,
+  ]);
 
   useEffect(() => {
     fetchProjectData();
@@ -115,6 +145,15 @@ const ProjectDetailPage = () => {
             : currentTask,
         ),
       );
+
+      const activityData =
+        await activityService.getProjectActivities(projectId, {
+          page: 0,
+          size: 10,
+        });
+
+      setActivities(activityData.content || []);
+      setActivityPage(activityData);
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -205,6 +244,15 @@ const ProjectDetailPage = () => {
         ),
       );
 
+      const activityData =
+        await activityService.getProjectActivities(projectId, {
+          page: 0,
+          size: 10,
+        });
+
+      setActivities(activityData.content || []);
+      setActivityPage(activityData);
+
       setTaskToDelete(null);
     } catch (err) {
       setError(
@@ -214,6 +262,39 @@ const ProjectDetailPage = () => {
       );
     } finally {
       setDeletingTask(false);
+    }
+  };
+
+  const handleLoadMoreActivities = async () => {
+    if (!activityPage || activityPage.last) {
+      return;
+    }
+
+    try {
+      setError("");
+
+      const nextPage = activityPage.number + 1;
+
+      const activityData =
+        await activityService.getProjectActivities(projectId, {
+          page: nextPage,
+          size: 10,
+          actionType: activityActionFilter || undefined,
+          entityType: activityEntityFilter || undefined,
+        });
+
+      setActivities((currentActivities) => [
+        ...currentActivities,
+        ...(activityData.content || []),
+      ]);
+
+      setActivityPage(activityData);
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          err.response?.data ||
+          "Unable to load more activities.",
+      );
     }
   };
 
@@ -362,6 +443,16 @@ const ProjectDetailPage = () => {
           </div>
         </div>
       )}
+
+      <ActivityFeed
+        activities={activities}
+        hasMore={activityPage && !activityPage.last}
+        onLoadMore={handleLoadMoreActivities}
+        actionFilter={activityActionFilter}
+        entityFilter={activityEntityFilter}
+        onActionFilterChange={setActivityActionFilter}
+        onEntityFilterChange={setActivityEntityFilter}
+      />
 
       <ConfirmModal
         open={Boolean(taskToDelete)}
