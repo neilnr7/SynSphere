@@ -80,7 +80,8 @@ public class CommentService {
                 ActivityActionType.ADDED,
                 ActivityEntityType.COMMENT,
                 comment.getId(),
-                "Comment added"
+                "Comment was added to task \""
+                        + task.getTitle() + "\""
         );
 
         //return dto
@@ -138,7 +139,8 @@ public class CommentService {
                 ActivityActionType.UPDATED,
                 ActivityEntityType.COMMENT,
                 comment.getId(),
-                "Comment updated"
+                "Comment on task \""
+                        + task.getTitle() + "\" was updated"
         );
 
         return mapToResponse(comment);
@@ -188,7 +190,8 @@ public class CommentService {
                 ActivityActionType.DELETED,
                 ActivityEntityType.COMMENT,
                 comment.getId(),
-                "Comment deleted"
+                "Comment on task \""
+                        + task.getTitle() + "\" was deleted"
         );
 
         commentRepository.delete(comment);

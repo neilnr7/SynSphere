@@ -69,7 +69,7 @@ public class ProjectService {
                 ActivityActionType.CREATED,
                 ActivityEntityType.PROJECT,
                 project.getId(),
-                "Project Created: " + project.getName()
+                "Project \"" + project.getName() + "\" was created"
         );
 
 
@@ -135,7 +135,7 @@ public class ProjectService {
                 ActivityActionType.UPDATED,
                 ActivityEntityType.PROJECT,
                 updatedProject.getId(),
-                "Project updated: " + updatedProject.getName()
+                "Project \"" + updatedProject.getName() + "\" was updated"
         );
 
         return mapToResponse(updatedProject);
@@ -200,7 +200,7 @@ public class ProjectService {
                 ActivityActionType.ADDED,
                 ActivityEntityType.MEMBER,
                 newMember.getId(),
-                "Added member: " + newUser.getEmail()
+                newUser.getName() + " was added to the project"
         );
     }
 
@@ -238,7 +238,7 @@ public class ProjectService {
                 ActivityActionType.REMOVED,
                 ActivityEntityType.MEMBER,
                 memberToRemove.getId(),
-                "Removed member: " + userToRemove.getEmail()
+                userToRemove.getName() + " was removed from the project"
         );
     }
 

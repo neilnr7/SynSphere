@@ -93,7 +93,7 @@ public class TaskService {
                 ActivityActionType.CREATED,
                 ActivityEntityType.TASK,
                 task.getTaskId(),
-                "Task Created: " + task.getTitle()
+                "Task \"" + task.getTitle() + "\" was created"
         );
 
         // Activity Log - Task Assigned
@@ -105,7 +105,8 @@ public class TaskService {
                     ActivityActionType.ASSIGNED,
                     ActivityEntityType.TASK,
                     task.getTaskId(),
-                    "Task assigned to " + assignedUser.getEmail()
+                    "Task \"" + task.getTitle() + "\" was assigned to "
+                            + assignedUser.getName()
             );
         }
 
@@ -170,7 +171,8 @@ public class TaskService {
                         ActivityActionType.ASSIGNED,
                         ActivityEntityType.TASK,
                         task.getTaskId(),
-                        "Task assigned to " + assignedUser.getEmail()
+                        "Task \"" + task.getTitle() + "\" was assigned to "
+                                + assignedUser.getName()
                 );
             }
         }
@@ -183,7 +185,7 @@ public class TaskService {
                 ActivityActionType.UPDATED,
                 ActivityEntityType.TASK,
                 task.getTaskId(),
-                "Task updated: " + task.getTitle()
+                "Task \"" + task.getTitle() + "\" was updated"
         );
         return mapToResponse(task);
     }
@@ -227,7 +229,11 @@ public class TaskService {
                 ActivityActionType.STATUS_CHANGED,
                 ActivityEntityType.TASK,
                 updated_task.getTaskId(),
-                oldStatus + " -> " + updated_task.getStatus()
+                "Task \"" + updated_task.getTitle()
+                        + "\" status changed from "
+                        + oldStatus
+                        + " to "
+                        + updated_task.getStatus()
         );
 
         return mapToResponse(updated_task);
@@ -265,7 +271,7 @@ public class TaskService {
                 ActivityActionType.DELETED,
                 ActivityEntityType.TASK,
                 deletedTaskId,
-                "Task deleted: " + deletedTaskTitle
+                "Task \"" + deletedTaskTitle + "\" was deleted"
         );
 
         taskRepository.delete(task);
