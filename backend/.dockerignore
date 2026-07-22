@@ -1,0 +1,30 @@
+# Maven build output
+target/
+
+# Git
+.git
+.gitignore
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env
+.env.*
+
+# Temporary files
+tmp/
+temp/
+
+# Maven Wrapper cache
+.mvn/wrapper/maven-wrapper.jar
