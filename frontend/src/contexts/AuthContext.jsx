@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import authService from "@/services/authService";
+import userService from "@/services/userService";
 import tokenStorage from "@/utils/tokenStorage";
 
 const AuthContext = createContext(null);
@@ -27,21 +28,49 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  useEffect(() => {
-    const storedToken = tokenStorage.getToken();
+  const loadCurrentUserProfile = async () => {
+    try {
+      const currentUser =
+        await userService.getCurrentUserProfile();
 
-    if (storedToken) {
-      const storedUser = getUserFromToken(storedToken);
+      setUser(currentUser);
 
-      if (storedUser) {
-        setToken(storedToken);
-        setUser(storedUser);
-      } else {
-        tokenStorage.removeToken();
-      }
+      return currentUser;
+    } catch (error) {
+      console.error(
+        "Unable to load current user profile.",
+        error,
+      );
+
+      throw error;
     }
+  };
 
-    setLoading(false);
+  useEffect(() => {
+    const initializeAuth = async () => {
+      const storedToken = tokenStorage.getToken();
+
+      if (storedToken) {
+        const storedUser = getUserFromToken(storedToken);
+
+        if (storedUser) {
+          setToken(storedToken);
+          setUser(storedUser);
+
+          try {
+            await loadCurrentUserProfile();
+          } catch {
+            clearAuth();
+          }
+        } else {
+          tokenStorage.removeToken();
+        }
+      }
+
+      setLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
   useEffect(() => {
@@ -49,10 +78,16 @@ export const AuthProvider = ({ children }) => {
       clearAuth();
     };
 
-    window.addEventListener("auth:unauthorized", handleUnauthorized);
+    window.addEventListener(
+      "auth:unauthorized",
+      handleUnauthorized,
+    );
 
     return () => {
-      window.removeEventListener("auth:unauthorized", handleUnauthorized);
+      window.removeEventListener(
+        "auth:unauthorized",
+        handleUnauthorized,
+      );
     };
   }, []);
 
@@ -63,6 +98,8 @@ export const AuthProvider = ({ children }) => {
 
     setToken(response.token);
     setUser(getUserFromToken(response.token));
+
+    await loadCurrentUserProfile();
 
     return response;
   };
@@ -75,7 +112,13 @@ export const AuthProvider = ({ children }) => {
     setToken(response.token);
     setUser(getUserFromToken(response.token));
 
+    await loadCurrentUserProfile();
+
     return response;
+  };
+
+  const updateUser = (updatedUser) => {
+    setUser(updatedUser);
   };
 
   const logout = () => {
@@ -90,9 +133,15 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    updateUser,
+    loadCurrentUserProfile,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export default AuthContext;

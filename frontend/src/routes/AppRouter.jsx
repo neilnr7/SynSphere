@@ -12,7 +12,8 @@ import CreateTaskPage from "@/pages/tasks/CreateTaskPage";
 import EditTaskPage from "@/pages/tasks/EditTaskPage";
 import MyTasksPage from "@/pages/mytasks/MyTasksPage";
 import TaskDetailPage from "@/pages/tasks/TaskDetailPage";
-
+import ProjectDashboardPage from "@/pages/dashboard/ProjectDashboardPage";
+import ProfileSettingsPage from "@/pages/settings/ProfileSettingsPage";
 
 const AppRouter = () => {
   return (
@@ -42,6 +43,11 @@ const AppRouter = () => {
             />
 
             <Route
+              path="/projects/:projectId/dashboard"
+              element={<ProjectDashboardPage />}
+            />
+
+            <Route
               path="/projects/:projectId/edit"
               element={<EditProjectPage />}
             />
@@ -65,6 +71,12 @@ const AppRouter = () => {
               path="/my-tasks"
               element={<MyTasksPage />}
             />
+
+            <Route
+              path="/settings"
+              element={<ProfileSettingsPage />}
+            />
+            
           </Route>
         </Route>
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ChevronRight, ListTodo, Plus } from "lucide-react";
+import { BarChart3 ,ChevronRight, ListTodo, Plus } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Button from "@/components/ui/Button";
 import EmptyState from "@/components/common/EmptyState";
@@ -179,6 +179,10 @@ const ProjectDetailPage = () => {
     navigate(`/projects/${projectId}/tasks/new`);
   };
 
+  const handleOpenDashboard = () => {
+    navigate(`/projects/${projectId}/dashboard`);
+  };
+
   const handleEditTask = (task) => {
     navigate(
       `/projects/${projectId}/tasks/${task.id}/edit`,
@@ -348,15 +352,24 @@ const ProjectDetailPage = () => {
           </p>
         </div>
 
-        {canEditTasks && (
+        <div className="flex shrink-0 items-center gap-2">
           <Button
-            leftIcon={Plus}
-            onClick={handleCreateTask}
-            className="shrink-0"
+            variant="secondary"
+            leftIcon={BarChart3}
+            onClick={handleOpenDashboard}
           >
-            New Task
+            Dashboard
           </Button>
-        )}
+
+          {canEditTasks && (
+            <Button
+              leftIcon={Plus}
+              onClick={handleCreateTask}
+            >
+              New Task
+            </Button>
+          )}
+        </div>
       </div>
 
       {tasks.length === 0 ? (

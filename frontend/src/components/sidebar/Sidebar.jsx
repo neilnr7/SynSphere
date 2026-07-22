@@ -228,7 +228,11 @@ const Sidebar = ({ isOpen = false, onClose }) => {
               }
             `}
           >
-            <Avatar name={user?.email} size="sm" />
+            <Avatar
+              name={user?.name || user?.email}
+              imageUrl={user?.profileImage}
+              size="sm"
+            />
 
             <div
               className={`
@@ -237,11 +241,11 @@ const Sidebar = ({ isOpen = false, onClose }) => {
               `}
             >
               <p className="truncate text-sm font-medium text-text">
-                {user?.email}
+                {user?.name || user?.email}
               </p>
 
-              <p className="text-xs text-text-muted">
-                Signed in
+              <p className="truncate text-xs text-text-muted">
+                {user?.email}
               </p>
             </div>
           </div>
