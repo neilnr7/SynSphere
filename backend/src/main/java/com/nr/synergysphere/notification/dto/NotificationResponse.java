@@ -16,6 +16,12 @@ public class NotificationResponse {
 
     private UUID activityId;
 
+    private UUID userId;
+
+    private String userName;
+
+    private String userEmail;
+
     private UUID entityId;
 
     private String actionType;

@@ -24,6 +24,8 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
 
     List<Notification> findByRecipientAndIsReadFalse(User recipient);
 
+    void deleteByRecipient(User recipient);
+
     @Modifying
     @Transactional
     @Query("""

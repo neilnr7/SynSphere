@@ -76,4 +76,10 @@ public class NotificationController {
         notificationService.markAllNotificationsRead(authentication.getName());
         return ResponseEntity.ok("All notifications marked as read.");
     }
+
+    @DeleteMapping
+    public ResponseEntity<String> clearNotifications(Authentication authentication) {
+        notificationService.clearNotifications(authentication.getName());
+        return ResponseEntity.ok("Notifications cleared successfully.");
+    }
 }

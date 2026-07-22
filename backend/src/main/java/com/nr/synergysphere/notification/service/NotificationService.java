@@ -117,12 +117,23 @@ public class NotificationService {
         notificationRepository.markAllAsRead(currentUser);
     }
 
+    @Transactional
+    public void clearNotifications(String email) {
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Current User not found"));
+
+        notificationRepository.deleteByRecipient(currentUser);
+    }
 
     private NotificationResponse mapToResponse(Notification notification){
         return NotificationResponse.builder()
                 .notification_id(notification.getNotification_id())
                 .projectId(notification.getProject().getId())
                 .activityId(notification.getActivityLog().getActivityId())
+                .userId(notification.getActivityLog().getUser().getId())
+                .userName(notification.getActivityLog().getUser().getName())
+                .userEmail(notification.getActivityLog().getUser().getEmail())
                 .entityId(notification.getActivityLog().getEntityId())
                 .actionType(notification.getActivityLog().getActionType().name())
                 .entityType(notification.getActivityLog().getEntityType().name())
