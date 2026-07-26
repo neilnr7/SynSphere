@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { BarChart3 ,ChevronRight, ListTodo, Plus } from "lucide-react";
+import {
+  BarChart3,
+  ChevronRight,
+  ListTodo,
+  Plus,
+  UserPlus,
+} from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Button from "@/components/ui/Button";
 import EmptyState from "@/components/common/EmptyState";
@@ -11,6 +17,7 @@ import taskService from "@/services/taskService";
 import activityService from "@/services/activityService";
 import useAuth from "@/hooks/useAuth";
 import ConfirmModal from "@/components/modals/ConfirmModal";
+import AddMemberModal from "@/components/modals/AddMemberModal";
 
 
 const ProjectDetailPage = () => {
@@ -38,6 +45,12 @@ const ProjectDetailPage = () => {
 
   const [taskToDelete, setTaskToDelete] = useState(null);
   const [deletingTask, setDeletingTask] = useState(false);
+
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [memberEmail, setMemberEmail] = useState("");
+  const [memberRole, setMemberRole] = useState("MEMBER");
+  const [memberError, setMemberError] = useState("");
+  const [addingMember, setAddingMember] = useState(false);
 
   const fetchProjectData = useCallback(async () => {
     try {
@@ -113,6 +126,10 @@ const ProjectDetailPage = () => {
   const canDeleteTasks =
     currentMember?.role === "OWNER";
 
+  const canAddMembers =
+    currentMember?.role === "OWNER" ||
+    currentMember?.role === "MANAGER";
+
   const canChangeTaskStatus = (task) => {
     if (!currentMember) {
       return false;
@@ -187,6 +204,60 @@ const ProjectDetailPage = () => {
     navigate(
       `/projects/${projectId}/tasks/${task.id}/edit`,
     );
+  };
+
+  const handleOpenAddMember = () => {
+    setMemberEmail("");
+    setMemberRole("MEMBER");
+    setMemberError("");
+    setIsAddMemberOpen(true);
+  };
+
+  const handleCancelAddMember = () => {
+    if (addingMember) {
+      return;
+    }
+
+    setIsAddMemberOpen(false);
+    setMemberEmail("");
+    setMemberRole("MEMBER");
+    setMemberError("");
+  };
+
+  const handleAddMember = async () => {
+    try {
+      setAddingMember(true);
+      setMemberError("");
+
+      await projectService.addProjectMember(projectId, {
+        userEmail: memberEmail,
+        role: memberRole,
+      });
+
+      const [memberData, activityData] = await Promise.all([
+        projectService.getProjectMembers(projectId),
+        activityService.getProjectActivities(projectId, {
+          page: 0,
+          size: 10,
+        }),
+      ]);
+
+      setMembers(memberData);
+      setActivities(activityData.content || []);
+      setActivityPage(activityData);
+
+      setIsAddMemberOpen(false);
+      setMemberEmail("");
+      setMemberRole("MEMBER");
+    } catch (err) {
+      setMemberError(
+        err.response?.data?.message ||
+          err.response?.data ||
+          "Unable to add member.",
+      );
+    } finally {
+      setAddingMember(false);
+    }
   };
 
   if (loading) {
@@ -361,6 +432,16 @@ const ProjectDetailPage = () => {
             Dashboard
           </Button>
 
+          {canAddMembers && (
+            <Button
+              variant="secondary"
+              leftIcon={UserPlus}
+              onClick={handleOpenAddMember}
+            >
+              Add Member
+            </Button>
+          )}
+
           {canEditTasks && (
             <Button
               leftIcon={Plus}
@@ -465,6 +546,18 @@ const ProjectDetailPage = () => {
         entityFilter={activityEntityFilter}
         onActionFilterChange={setActivityActionFilter}
         onEntityFilterChange={setActivityEntityFilter}
+      />
+
+      <AddMemberModal
+        open={isAddMemberOpen}
+        email={memberEmail}
+        role={memberRole}
+        error={memberError}
+        loading={addingMember}
+        onEmailChange={setMemberEmail}
+        onRoleChange={setMemberRole}
+        onSubmit={handleAddMember}
+        onCancel={handleCancelAddMember}
       />
 
       <ConfirmModal
