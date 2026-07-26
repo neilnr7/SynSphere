@@ -58,3 +58,36 @@ The application features role-based project collaboration, JWT-based authenticat
 - Update user profile information
 - Profile image support
 - Secure password change functionality
+
+
+## Tech Stack
+
+### Frontend
+- React
+- Vite
+- JavaScript
+- Tailwind CSS
+
+
+### Backend
+- Java 21
+- Spring Boot
+- Spring Security
+- JWT Authentication
+- Spring Data JPA
+- Maven
+- Lombok
+
+### Database
+- PostgreSQL
+- Neon PostgreSQL
+
+### Deployment
+- Vercel — Frontend
+- Render — Backend
+
+
+### Development Tools
+- Git
+- GitHub
+- Postman
