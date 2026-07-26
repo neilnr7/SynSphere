@@ -169,13 +169,14 @@ const NotificationDropdown = ({
   return (
     <div
       className="
-        absolute right-0 top-12 z-50
-        w-[calc(100vw-2rem)] max-w-sm
+        fixed left-4 right-4 top-20 z-50
         overflow-hidden
         rounded-card
         border border-border
         bg-surface
         shadow-lg
+        sm:absolute sm:left-auto sm:right-0 sm:top-12
+        sm:w-96
       "
     >
       <div

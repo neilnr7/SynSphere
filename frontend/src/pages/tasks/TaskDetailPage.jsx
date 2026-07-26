@@ -512,10 +512,12 @@ const TaskDetailPage = () => {
 
                     <div className="flex items-center gap-2">
                         <p className="text-xs text-text-muted">
-                        {formatCommentDate(comment.createdAt)}
+                          {formatCommentDate(comment.createdAt)}
 
-                        {comment.updatedAt &&
-                            comment.createdAt !== comment.updatedAt &&
+                          {comment.updatedAt &&
+                            new Date(comment.updatedAt).getTime() -
+                              new Date(comment.createdAt).getTime() >
+                              1000 &&
                             " · edited"}
                         </p>
 

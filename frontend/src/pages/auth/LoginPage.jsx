@@ -48,7 +48,7 @@ const LoginPage = () => {
 
             <Link
               to="/register"
-              className="rounded-button bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-primary-hover"
+              className="rounded-button bg-primary px-4 py-2 text-sm font-medium !text-white transition-colors duration-200 hover:bg-primary-hover"
             >
               Sign Up
             </Link>
@@ -133,9 +133,23 @@ const LoginPage = () => {
           <p>© 2026 SynSphere. Built for better collaboration.</p>
 
           <div className="flex gap-6">
-            <span>Quick Links</span>
-            <span>Company</span>
-            <span>Connect</span>
+            <a
+              href="https://github.com/neilnr7"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-primary"
+            >
+              GitHub
+            </a>
+
+            <a
+              href="https://www.linkedin.com/in/neil-rego"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-primary"
+            >
+              LinkedIn
+            </a>
           </div>
         </div>
       </footer>
