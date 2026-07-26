@@ -91,3 +91,30 @@ The application features role-based project collaboration, JWT-based authenticat
 - Git
 - GitHub
 - Postman
+
+  ## System Architecture
+
+SynSphere follows a client-server architecture with a separate React frontend, Spring Boot REST API, and PostgreSQL database.
+
+```text
+┌──────────────────────────────┐
+│        React Frontend        │
+│      Vite + Tailwind CSS     │
+│       Hosted on Vercel       │
+└──────────────┬───────────────┘
+               │
+               │ HTTPS / REST API
+               │ JWT Authorization
+               ▼
+┌──────────────────────────────┐
+│      Spring Boot Backend     │
+│ Spring Security + JPA + JWT  │
+│       Hosted on Render       │
+└──────────────┬───────────────┘
+               │
+               │ Hibernate / JPA
+               ▼
+┌──────────────────────────────┐
+│        PostgreSQL DB         │
+│       Hosted on Neon         │
+└──────────────────────────────┘
