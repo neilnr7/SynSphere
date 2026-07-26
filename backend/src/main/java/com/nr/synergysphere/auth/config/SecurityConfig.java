@@ -65,7 +65,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(
                 List.of(
                         "http://localhost:5173",
-                        "https://syn-sphere-3z6af2arv-neil21.vercel.app"
+                        "https://syn-sphere.vercel.app"
                 )
         );
 
