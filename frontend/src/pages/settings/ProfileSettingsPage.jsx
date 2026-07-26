@@ -4,7 +4,7 @@ import PageLoader from "@/components/common/PageLoader";
 import PasswordInput from "@/components/forms/PasswordInput";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import Textarea from "@/components/ui/TextArea";
+import Textarea from "@/components/ui/Textarea";
 import userService from "@/services/userService";
 import useAuth from "@/hooks/useAuth";
 
