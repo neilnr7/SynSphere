@@ -8,8 +8,8 @@ The application features role-based project collaboration, JWT-based authenticat
 
 ## Live Deployment
 
-- **Frontend:** https://syn-sphere.vercel.app
-- **Backend API:** https://synsphere-t9v9.onrender.com
+- **Web Application:** https://syn-sphere.vercel.app
+
 
 > **Note:** The backend is hosted on Render's free tier and may take a short time to wake up after a period of inactivity.
 
